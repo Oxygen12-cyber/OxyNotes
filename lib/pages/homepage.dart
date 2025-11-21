@@ -3,8 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:notepadapp/components/components.dart';
 import 'package:notepadapp/extensions/extension.dart';
-import 'package:notepadapp/model/model.dart';
 import 'package:notepadapp/pages/newnotepage.dart';
+import 'package:provider/provider.dart';
+import 'profilepage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,12 +16,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _searchController = TextEditingController();
-
-  @override
-  void initState() {
-    final List newList = MyNotes;
-    super.initState();
-  }
 
   @override
   void dispose() {
@@ -70,14 +65,22 @@ class _HomePageState extends State<HomePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                CircleAvatar(
-                  radius: 48,
-                  backgroundColor:
-                      Theme.of(context).brightness == Brightness.light
-                      ? Color(0xffeff2f9)
-                      : Color(0xffe9ecec),
-                  foregroundImage: AssetImage(
-                    'assets/images/avatar_image2.png',
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProfilePage()),
+                    );
+                  },
+                  child: CircleAvatar(
+                    radius: 48,
+                    backgroundColor:
+                        Theme.of(context).brightness == Brightness.light
+                        ? Color(0xffeff2f9)
+                        : Color(0xffe9ecec),
+                    foregroundImage: AssetImage(
+                      'assets/images/avatar_image2.png',
+                    ),
                   ),
                 ),
                 SizedBox(width: 5),
@@ -160,18 +163,43 @@ class _HomePageState extends State<HomePage> {
               child: SizedBox(
                 height: context.hp(60),
                 width: double.infinity,
-                child: Container(
-                  child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                    ),
-                    itemCount: MyNotes.length,
-                    itemBuilder: (context, index) {
-                      final String title = MyNotes[index]['title'] ?? "";
-                      final String preview = MyNotes[index]['content'] ?? "";
-                      return NoteGrid(title: title, textPreview: preview);
-                    },
-                  ),
+                child: Consumer<NoteClass>(
+                  builder:
+                      (BuildContext context, NoteClass value, Widget? child) {
+                        return GridView.builder(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                              ),
+                          itemCount: value.noteStore.length,
+                          itemBuilder: (context, index) {
+                            final String title =
+                                value.noteStore[index]["title"] ?? "";
+                            final String preview =
+                                value.noteStore[index]["content"] ?? "";
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) {
+                                      return NewNotePage(
+                                        title: title,
+                                        content: preview,
+                                        index: index,
+                                      );
+                                    },
+                                  ),
+                                );
+                              },
+                              child: NoteGrid(
+                                title: title,
+                                textPreview: preview,
+                              ),
+                            );
+                          },
+                        );
+                      },
                 ),
               ),
             ),

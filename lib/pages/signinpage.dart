@@ -1,0 +1,281 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:iconsax/iconsax.dart';
+import 'package:notepadapp/extensions/extension.dart';
+import 'package:notepadapp/pages/homepage.dart';
+import 'package:notepadapp/pages/signuppage.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+final supabase = Supabase.instance.client;
+
+class SignInPage extends StatefulWidget {
+  const SignInPage({super.key});
+
+  @override
+  State<SignInPage> createState() => _SignInPageState();
+}
+
+class _SignInPageState extends State<SignInPage> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  bool isLoading = false;
+
+  Future<void> handleSignin(String email, String pass) async {
+    final AuthResponse response = await supabase.auth.signInWithPassword(
+      email: email,
+      password: pass,
+    );
+    final User? user = response.user;
+    final Session? sess = response.session;
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(automaticallyImplyLeading: false),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 15,
+            children: [
+              SizedBox(height: context.hp(0)),
+              Text(
+                "Sign In",
+                style: GoogleFonts.ubuntuSansMono(
+                  letterSpacing: 1.3,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                "Sign in with your email",
+                style: GoogleFonts.ubuntuSansMono(
+                  letterSpacing: 1.1,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w400,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
+              ),
+              SizedBox(height: context.hp(1.2)),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5.0),
+
+                child: TextField(
+                  controller: emailController,
+                  textAlign: TextAlign.left,
+                  textAlignVertical: TextAlignVertical.center,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                  decoration: InputDecoration(
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: IconButton(
+                        icon: Icon(Iconsax.sms),
+                        onPressed: () {},
+                      ),
+                    ),
+                    fillColor: Theme.of(context).brightness == Brightness.light
+                        ? Theme.of(context).colorScheme.surfaceContainerHighest
+                        : Color(0xff242947),
+                    filled: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 20,
+                      horizontal: 10,
+                    ),
+                    hintText: "Email",
+                    hintStyle: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.normal,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        width: 0,
+                        color: Colors.transparent,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        width: 2,
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? Theme.of(context).primaryColor.withAlpha(80)
+                            : Theme.of(context).colorScheme.secondary,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: context.hp(1.2)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                child: TextField(
+                  controller: passwordController,
+                  textAlign: TextAlign.left,
+                  textAlignVertical: TextAlignVertical.center,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                  decoration: InputDecoration(
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: IconButton(
+                        icon: Icon(Iconsax.password_check),
+                        onPressed: () {},
+                      ),
+                    ),
+                    fillColor: Theme.of(context).brightness == Brightness.light
+                        ? Theme.of(context).colorScheme.surfaceContainerHighest
+                        : Color(0xff242947),
+                    filled: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 20,
+                      horizontal: 10,
+                    ),
+                    hintText: "Password",
+                    hintStyle: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.normal,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        width: 0,
+                        color: Colors.transparent,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        width: 2,
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? Theme.of(context).primaryColor.withAlpha(80)
+                            : Theme.of(context).colorScheme.secondary,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: context.hp(5)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 20,
+                children: [
+                  OutlinedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignUpPage()),
+                      );
+                    },
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 22,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      "Sign Up",
+                      style: GoogleFonts.ubuntuSans(
+                        letterSpacing: 1.2,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ),
+                  FilledButton(
+                    onPressed: () async {
+                      setState(() {
+                        isLoading = true;
+                      });
+                      try {
+                        await handleSignin(
+                          emailController.text,
+                          passwordController.text,
+                        );
+                        if (!context.mounted) {
+                          return;
+                        }
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => HomePage()),
+                        );
+                      } on AuthException catch (err) {
+                        if (!context.mounted) {
+                          return;
+                        }
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(err.message)));
+                      } catch (err) {
+                        if (!context.mounted) {
+                          return;
+                        }
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(err.toString())));
+                      }
+                      setState(() {
+                        isLoading = false;
+                      });
+                    },
+                    style: FilledButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 22,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: isLoading
+                        ? CircularProgressIndicator(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHigh,
+                          )
+                        : Text(
+                            "Sign IN",
+                            style: GoogleFonts.ubuntuSans(
+                              letterSpacing: 1.2,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onInverseSurface
+                                  .withValues(alpha: 0.9),
+                            ),
+                          ),
+                  ),
+                ],
+              ),
+              SizedBox(height: context.hp(12)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

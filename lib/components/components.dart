@@ -43,7 +43,7 @@ class NoteGrid extends StatelessWidget {
               color: Theme.of(
                 context,
               ).colorScheme.onSurfaceVariant.withAlpha(150),
-              fontSize: 12,
+              fontSize: 16,
               fontWeight: FontWeight.w400,
             ),
           ),
