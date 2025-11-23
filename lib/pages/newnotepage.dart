@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:notepadapp/extensions/extension.dart';
+import 'package:notepadapp/model/model.dart';
 import 'package:provider/provider.dart';
 
 class NewNotePage extends StatefulWidget {
   final String? title;
   final String? content;
   final int? index;
+  final String? noteId;
 
-  const NewNotePage({super.key, this.title, this.content, this.index});
+  const NewNotePage({super.key, this.title, this.content, this.index, this.noteId});
 
   @override
   State<NewNotePage> createState() => _NewNotePageState();
@@ -28,6 +30,17 @@ class _NewNotePageState extends State<NewNotePage> {
       noteModel.editNote(atitle, acontent, widget.index!);
     } else {
       debugPrint("adding new note");
+      noteModel.addNewNote(atitle, acontent);
+    }
+  }
+
+  Future<void> saveSuperB(String atitle, String acontent) async {
+    final noteModel = Provider.of<SupabaseDb>(context, listen: false);
+    if (widget.index != null) {
+      debugPrint("editing note ${widget.index}");
+      noteModel.editNote(atitle, acontent, widget.index, widget.noteId!);
+    } else {
+      debugPrint('adding newnote');
       noteModel.addNewNote(atitle, acontent);
     }
   }
@@ -75,7 +88,11 @@ class _NewNotePageState extends State<NewNotePage> {
                 onTap: () {
                   debugPrint('clicked save');
                   if (_titleTextController.text.isNotEmpty) {
-                    saveNoteProd(
+                    // saveNoteProd(
+                    //   _titleTextController.text,
+                    //   _contentTextController.text,
+                    // );
+                    saveSuperB(
                       _titleTextController.text,
                       _contentTextController.text,
                     );

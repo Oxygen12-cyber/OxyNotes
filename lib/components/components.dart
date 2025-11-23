@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iconsax/iconsax.dart';
 
 import 'package:notepadapp/extensions/extension.dart';
 import 'package:notepadapp/model/model.dart';
@@ -7,8 +8,14 @@ import 'package:notepadapp/model/model.dart';
 class NoteGrid extends StatelessWidget {
   final String title;
   final String textPreview;
+  final Future<void> Function()? onDelete;
 
-  const NoteGrid({super.key, required this.title, required this.textPreview});
+  const NoteGrid({
+    super.key,
+    required this.title,
+    required this.textPreview,
+    this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,15 +33,46 @@ class NoteGrid extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            maxLines: 2,
-            style: GoogleFonts.poppins(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title.length > 10
+                    ? '${title.substring(0, title.indexOf(' ') + 3)}...'
+                    : title,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                style: GoogleFonts.poppins(
+                  fontSize: title.length > 10 ? 16 : 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Spacer(),
+              PopupMenuButton(
+                icon: Icon(Iconsax.more),
+                iconSize: 24,
+                padding: EdgeInsets.all(3),
+                menuPadding: EdgeInsets.all(2),
+                tooltip: "delete note",
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                color: Theme.of(context).colorScheme.onPrimary,
+                itemBuilder: (context) => [
+                  PopupMenuItem(value: 'delete_note', child: Text('delete')),
+                ],
+                onSelected: (String value) {
+                  debugPrint('onSelected called with: $value');
+                  if (value == 'delete_note') {
+                    debugPrint('internal try to $value');
+                    onDelete?.call();
+                  }
+                },
+              ),
+            ],
           ),
-          SizedBox(height: context.hp(2)),
+          // SizedBox(height: context.hp(2)),
           Text(
             textPreview,
             overflow: TextOverflow.ellipsis,
@@ -65,4 +103,23 @@ class NoteGrid extends StatelessWidget {
       ),
     );
   }
+}
+
+SnackBar customSnackBar(BuildContext context, String textValue) {
+  return SnackBar(
+    dismissDirection: DismissDirection.down,
+    duration: Durations.short4,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+    backgroundColor: Theme.of(context).colorScheme.onError,
+    content: Center(
+      child: Text(
+        textValue,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.primary,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ),
+  );
 }

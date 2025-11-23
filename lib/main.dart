@@ -1,7 +1,9 @@
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:notepadapp/extensions/extension.dart';
-import 'package:notepadapp/pages/signuppage.dart';
+import 'package:notepadapp/model/model.dart';
+import 'package:notepadapp/pages/homepage.dart';
+import 'package:notepadapp/pages/signinpage.dart';
 import 'package:notepadapp/theme/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -17,7 +19,10 @@ Future<void> main() async {
   runApp(
     DevicePreview(
       builder: (context) => MultiProvider(
-        providers: [ChangeNotifierProvider(create: (context) => NoteClass())],
+        providers: [
+          ChangeNotifierProvider(create: (context) => NoteClass()),
+          ChangeNotifierProvider(create: (context) => SupabaseDb()),
+        ],
         child: NoteApp(),
       ),
     ),
@@ -35,7 +40,38 @@ class NoteApp extends StatelessWidget {
       theme: lighttheme,
       darkTheme: darktheme,
       themeMode: ThemeMode.system,
-      home: SignUpPage(),
+      home: StreamBuilder(
+        stream: Supabase.instance.client.auth.onAuthStateChange,
+        builder: (context, snapshot) {
+          final Session? session = snapshot.data?.session;
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(
+                  color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                ),
+              ),
+            );
+          }
+          if (snapshot.hasError) {
+            return Scaffold(
+              body: Center(
+                child: Text(
+                  "${snapshot.error}",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            );
+          }
+
+          return session != null ? HomePage() : SignInPage();
+        },
+      ),
     );
   }
 }

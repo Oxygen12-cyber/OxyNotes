@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:notepadapp/components/components.dart';
 import 'package:notepadapp/extensions/extension.dart';
 import 'package:notepadapp/pages/signinpage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -20,12 +21,7 @@ class _SignUpPageState extends State<SignUpPage> {
   bool isLoading = false;
 
   Future<void> handleSignup(String email, String password) async {
-    final AuthResponse response = await supabase.auth.signUp(
-      email: email,
-      password: password,
-    );
-    final Session? sess = response.session;
-    final User? user = response.user;
+    await supabase.auth.signUp(email: email, password: password);
   }
 
   @override
@@ -218,23 +214,40 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                           );
                         } on AuthException catch (err) {
-                          if (!context.mounted) {
-                            return;
+                          if (err.message.toLowerCase().contains(
+                                'already registered',
+                              ) ||
+                              err.message.toLowerCase().contains(
+                                'user already exists',
+                              )) {
+                            debugPrint(err.message);
+                            // if (mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              customSnackBar(
+                                context,
+                                "User is already registered; please Sign In",
+                              ),
+                            );
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SignInPage(),
+                              ),
+                            );
                           }
+                          if (!context.mounted) return;
                           ScaffoldMessenger.of(
                             context,
-                          ).showSnackBar(SnackBar(content: Text(err.message)));
+                          ).showSnackBar(customSnackBar(context, err.message));
                         } catch (err) {
-                          if (!context.mounted) {
-                            return;
-                          }
+                          if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(err.toString())),
+                            customSnackBar(context, err.toString()),
                           );
                         }
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("fill in all fields")),
+                          customSnackBar(context, "fill in all fields"),
                         );
                       }
                       setState(() {
@@ -251,7 +264,11 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                     ),
                     child: isLoading
-                        ? CircularProgressIndicator(color: Theme.of(context).colorScheme.surfaceContainerHigh,)
+                        ? CircularProgressIndicator(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHigh,
+                          )
                         : Text(
                             "Sign Up",
                             style: GoogleFonts.ubuntuSans(

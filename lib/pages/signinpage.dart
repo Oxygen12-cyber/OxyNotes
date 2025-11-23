@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:notepadapp/components/components.dart';
 import 'package:notepadapp/extensions/extension.dart';
 import 'package:notepadapp/pages/homepage.dart';
 import 'package:notepadapp/pages/signuppage.dart';
@@ -21,12 +22,9 @@ class _SignInPageState extends State<SignInPage> {
   bool isLoading = false;
 
   Future<void> handleSignin(String email, String pass) async {
-    final AuthResponse response = await supabase.auth.signInWithPassword(
-      email: email,
-      password: pass,
-    );
-    final User? user = response.user;
-    final Session? sess = response.session;
+    debugPrint("signin started");
+    await supabase.auth.signInWithPassword(email: email, password: pass);
+    debugPrint("signin loaded");
   }
 
   @override
@@ -215,27 +213,39 @@ class _SignInPageState extends State<SignInPage> {
                           emailController.text,
                           passwordController.text,
                         );
-                        if (!context.mounted) {
-                          return;
-                        }
+                        if (!context.mounted) return;
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => HomePage()),
                         );
                       } on AuthException catch (err) {
-                        if (!context.mounted) {
-                          return;
+                        if (err.message.toLowerCase().contains('not') ||
+                            err.message.toLowerCase().contains('invalid')) {
+                          debugPrint(err.message);
+
+                          // if (mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            customSnackBar(
+                              context,
+                              "User not registered; please Sign Up",
+                            ),
+                          );
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SignUpPage(),
+                            ),
+                          );
                         }
+                        // if (mounted) return;
                         ScaffoldMessenger.of(
                           context,
-                        ).showSnackBar(SnackBar(content: Text(err.message)));
+                        ).showSnackBar(customSnackBar(context, err.message));
                       } catch (err) {
-                        if (!context.mounted) {
-                          return;
-                        }
+                        // if (!context.mounted) return;
                         ScaffoldMessenger.of(
                           context,
-                        ).showSnackBar(SnackBar(content: Text(err.toString())));
+                        ).showSnackBar(customSnackBar(context, err.toString()));
                       }
                       setState(() {
                         isLoading = false;

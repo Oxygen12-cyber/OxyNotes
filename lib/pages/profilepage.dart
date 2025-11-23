@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:notepadapp/components/components.dart';
 import 'package:notepadapp/extensions/extension.dart';
 import 'package:notepadapp/pages/signinpage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -45,6 +46,8 @@ class ProfilePage extends StatelessWidget {
           builder: (context, asyncSnapshot) {
             final Session? session = asyncSnapshot.data?.session;
             final user = session?.user;
+            final emailDisplay = user?.email ?? '';
+            final emailLength = emailDisplay.length;
 
             return Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -61,15 +64,17 @@ class ProfilePage extends StatelessWidget {
                 SizedBox(height: context.hp(5)),
 
                 Text(
-                  user?.email ?? 'Alexandria Jamie',
+                  emailDisplay,
                   style: GoogleFonts.ubuntuSans(
                     letterSpacing: 1.3,
-                    fontSize: 28,
+                    fontSize: emailLength > 16 ? 24 : 28,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  "Job Specialist at Google Inc ; \n from Nargrid",
+                  emailLength < 1
+                      ? ""
+                      : "Job Specialist at Google Inc ; \n from Nargrid",
                   textAlign: TextAlign.center,
                   style: GoogleFonts.ubuntuSans(
                     fontSize: 18,
@@ -83,15 +88,34 @@ class ProfilePage extends StatelessWidget {
                 IconButton.filledTonal(
                   onPressed: () async {
                     debugPrint("logout clicked");
-                    await supabase.auth.signOut();
-                    debugPrint('signed userout');
-                    if (!context.mounted) {
-                      return;
+                    try {
+                      await supabase.auth.signOut();
+                      debugPrint('signed userout');
+                      if (!context.mounted) {
+                        return;
+                      }
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(customSnackBar(context, 'Signing out'));
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignInPage()),
+                      );
+                    } on AuthException catch (err) {
+                      if (!context.mounted) {
+                        return;
+                      }
+                      debugPrint("logout error: ${err.message}");
+
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(customSnackBar(context, err.message));
+                    } catch (err) {
+                      debugPrint("logout error: ${err.toString()}");
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(customSnackBar(context, err.toString()));
                     }
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => SignInPage()),
-                    );
                   },
                   tooltip: "logout",
                   alignment: Alignment.center,

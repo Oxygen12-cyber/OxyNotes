@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:notepadapp/components/components.dart';
 import 'package:notepadapp/extensions/extension.dart';
+import 'package:notepadapp/model/model.dart';
 import 'package:notepadapp/pages/newnotepage.dart';
 import 'package:provider/provider.dart';
 import 'profilepage.dart';
@@ -18,9 +19,23 @@ class _HomePageState extends State<HomePage> {
   final _searchController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SupabaseDb>().getAllNotes();
+    });
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> loadNewData() async {
+    debugPrint('trying to get new data');
+    context.read<SupabaseDb>().getAllNotes();
+    debugPrint('loaded new data');
   }
 
   @override
@@ -28,14 +43,15 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
+        onPressed: () async {
           debugPrint('clicked add');
-          Navigator.push(
+          await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => NewNotePage()),
-          ).then((_) {
-            setState(() {});
-          });
+          );
+          if (mounted) {
+            loadNewData();
+          }
         },
         enableFeedback: true,
         shape: CircleBorder(),
@@ -66,11 +82,14 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 GestureDetector(
-                  onTap: () {
-                    Navigator.push(
+                  onTap: () async {
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => ProfilePage()),
                     );
+                    if (mounted) {
+                      loadNewData();
+                    }
                   },
                   child: CircleAvatar(
                     radius: 48,
@@ -163,23 +182,26 @@ class _HomePageState extends State<HomePage> {
               child: SizedBox(
                 height: context.hp(60),
                 width: double.infinity,
-                child: Consumer<NoteClass>(
+                child: Consumer<SupabaseDb>(
                   builder:
-                      (BuildContext context, NoteClass value, Widget? child) {
+                      (BuildContext context, SupabaseDb value, Widget? child) {
                         return GridView.builder(
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 2,
                               ),
-                          itemCount: value.noteStore.length,
+                          itemCount: value.noteCache.length,
                           itemBuilder: (context, index) {
                             final String title =
-                                value.noteStore[index]["title"] ?? "";
+                                value.noteCache[index]["title"] ?? "";
                             final String preview =
-                                value.noteStore[index]["content"] ?? "";
+                                value.noteCache[index]["content"] ?? "";
+                            final String noteId =
+                                value.noteCache[index]['id'] ?? "";
+
                             return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
+                              onTap: () async {
+                                await Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) {
@@ -187,14 +209,30 @@ class _HomePageState extends State<HomePage> {
                                         title: title,
                                         content: preview,
                                         index: index,
+                                        noteId: noteId,
                                       );
                                     },
                                   ),
                                 );
+
+                                if (mounted) {
+                                  loadNewData();
+                                }
                               },
                               child: NoteGrid(
                                 title: title,
                                 textPreview: preview,
+                                onDelete: () async {
+                                  try {
+                                    await value.deleteNote(title, preview, noteId);
+                                    debugPrint('deleted note');
+                                  } catch (err) {
+                                    if (!context.mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(err.toString())),
+                                    );
+                                  }
+                                },
                               ),
                             );
                           },
