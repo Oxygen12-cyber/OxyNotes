@@ -105,12 +105,14 @@ class NoteGrid extends StatelessWidget {
   }
 }
 
-SnackBar customSnackBar(BuildContext context, String textValue) {
+SnackBar customSnackBar(BuildContext context, String textValue, String? value) {
   return SnackBar(
     dismissDirection: DismissDirection.down,
-    duration: Durations.short4,
+    duration: Durations.long2,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-    backgroundColor: Theme.of(context).colorScheme.onError,
+    backgroundColor: value!.contains("good")
+        ? Theme.of(context).colorScheme.surfaceBright
+        : Theme.of(context).colorScheme.error,
     content: Center(
       child: Text(
         textValue,

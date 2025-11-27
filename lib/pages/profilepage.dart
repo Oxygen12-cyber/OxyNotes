@@ -96,7 +96,7 @@ class ProfilePage extends StatelessWidget {
                       }
                       ScaffoldMessenger.of(
                         context,
-                      ).showSnackBar(customSnackBar(context, 'Signing out'));
+                      ).showSnackBar(customSnackBar(context, 'Signing out', 'good'));
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => SignInPage()),
@@ -109,12 +109,12 @@ class ProfilePage extends StatelessWidget {
 
                       ScaffoldMessenger.of(
                         context,
-                      ).showSnackBar(customSnackBar(context, err.message));
+                      ).showSnackBar(customSnackBar(context, err.message, 'bad'));
                     } catch (err) {
                       debugPrint("logout error: ${err.toString()}");
                       ScaffoldMessenger.of(
                         context,
-                      ).showSnackBar(customSnackBar(context, err.toString()));
+                      ).showSnackBar(customSnackBar(context, err.toString(), 'bad'));
                     }
                   },
                   tooltip: "logout",
