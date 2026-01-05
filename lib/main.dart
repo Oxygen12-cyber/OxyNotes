@@ -1,5 +1,6 @@
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:notepadapp/extensions/extension.dart';
 import 'package:notepadapp/model/model.dart';
 import 'package:notepadapp/pages/homepage.dart';
@@ -10,6 +11,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   await Supabase.initialize(
     url: 'https://pzqlaqxjmqoztduborga.supabase.co',
     anonKey:
@@ -17,6 +19,14 @@ Future<void> main() async {
   );
 
   runApp(
+    // MultiProvider(
+    //     providers: [
+    //       ChangeNotifierProvider(create: (context) => NoteClass()),
+    //       ChangeNotifierProvider(create: (context) => SupabaseDb())
+    //     ],
+    //     child: NoteApp(),
+    //   )
+
     DevicePreview(
       builder: (context) => MultiProvider(
         providers: [

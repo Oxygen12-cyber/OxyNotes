@@ -5,6 +5,7 @@ final lighttheme = ThemeData(
     seedColor: const Color(0xff3953b8),
     onError: Colors.red[200],
     brightness: Brightness.light,
+    surfaceContainerHighest: Color.fromARGB(255, 214, 204, 252),
   ),
   scaffoldBackgroundColor: const Color(0xffffffff),
   appBarTheme: AppBarThemeData(
